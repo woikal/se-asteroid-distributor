@@ -1,0 +1,230 @@
+[
+    {
+        "type": "planet",
+        "name": "Terra",
+        "coordinates": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+        },
+        "details": {
+            "radius": 62,
+            "color": {
+                "r": 100,
+                "g": 120,
+                "b": 220
+            },
+            "gravity": 1.0,
+            "atmosphere": "dense",
+            "oxygen": "high",
+            "resources": [],
+            "difficulty": "normal"
+        },
+        "pois": [
+            {
+                "type": "moon",
+                "name": "Luna",
+                "coordinates": {
+                    "x": 16,
+                    "y": 136,
+                    "z": -113
+                },
+                "details": {
+                    "radius": 10,
+                    "color": {
+                        "r": 190,
+                        "g": 190,
+                        "b": 200
+                    },
+                    "gravity": 0.25,
+                    "atmosphere": "none",
+                    "oxygen": "none",
+                    "resources": [],
+                    "difficulty": "easy"
+                },
+                "pois": [
+                    {
+                        "type": "station",
+                        "name": "Tradingpost Luna",
+                        "coordinates": {
+                            "x": 14,
+                            "y": 123,
+                            "z": -117
+                        },
+                        "details": {
+                            "jump": {
+                                "x": 252943,
+                                "y": 171225,
+                                "z": 50503
+                            },
+                            "security": "pve",
+                            "description": ""
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "planet",
+        "name": "Mars",
+        "coordinates": {
+            "x": 1031,
+            "y": 131,
+            "z": 1631
+        },
+        "details": {
+            "radius": 50,
+            "color": {
+                "r": 100,
+                "g": 150,
+                "b": 255,
+                "hex": "0xb07020"
+            },
+            "gravity": 1.0,
+            "atmosphere": "dense",
+            "oxygen": "high",
+            "resources": [],
+            "difficulty": "hard"
+        },
+        "pois": [
+            {
+                "type": "moon",
+                "name": "Europe",
+                "coordinates": {
+                    "x": 916,
+                    "y": 16,
+                    "z": 1631
+                },
+                "details": {
+                    "radius": 10,
+                    "color": {
+                        "r": 100,
+                        "g": 150,
+                        "b": 255,
+                        "hex": "0x3060ff"
+                    },
+                    "gravity": 1.0,
+                    "atmosphere": "thin",
+                    "oxygen": "low",
+                    "resources": [],
+                    "difficulty": "hard"
+                },
+                "pois": [
+                    {
+                        "type": "station",
+                        "name": "Tradingpost Europe",
+                        "coordinates": {
+                            "x": 930,
+                            "y": 19,
+                            "z": 1614
+                        },
+                        "details": {
+                            "jump": {
+                                "x": 252943,
+                                "y": 171225,
+                                "z": 50503
+                            },
+                            "security": "pve",
+                            "description": ""
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "planet",
+        "name": "Alien",
+        "coordinates": {
+            "x": 131,
+            "y": 131,
+            "z": 5731
+        },
+        "details": {
+            "radius": 69,
+            "color": {
+                "r": 100,
+                "g": 150,
+                "b": 255,
+                "hex": "0x306020"
+            },
+            "gravity": 1.0,
+            "atmosphere": "dense",
+            "oxygen": "high",
+            "resources": [],
+            "difficulty": "hard"
+        },
+        "pois": [
+            {
+                "type": "moon",
+                "name": "Titan",
+                "coordinates": {
+                    "x": 36,
+                    "y": 226,
+                    "z": 5793
+                },
+                "details": {
+                    "radius": 10,
+                    "color": {
+                        "r": 100,
+                        "g": 150,
+                        "b": 255,
+                        "hex": "0xffbb33"
+                    },
+                    "gravity": 1.0,
+                    "atmosphere": "thin",
+                    "oxygen": "low",
+                    "resources": [],
+                    "difficulty": "normal"
+                },
+                "pois": [
+                    {
+                        "type": "station",
+                        "name": "Tradingpost Titan",
+                        "coordinates": {
+                            "x": 36,
+                            "y": 212,
+                            "z": 5798
+                        },
+                        "details": {
+                            "jump": {
+                                "x": 252943,
+                                "y": 171225,
+                                "z": 50503
+                            },
+                            "security": "pve",
+                            "description": ""
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "station",
+        "name": "Freeport",
+        "coordinates": {
+            "x": 140,
+            "y": 108,
+            "z": -88
+        },
+        "details": {
+            "security": "pvp",
+            "description": ""
+        }
+    },
+    {
+        "type": "station",
+        "name": "Space One",
+        "coordinates": {
+            "x": 525,
+            "y": 85,
+            "z": 764
+        },
+        "details": {
+            "security": "pve",
+            "description": ""
+        }
+    }
+]

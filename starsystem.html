@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Starsystem POI</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Roboto;
+        }
+    </style>
+    <script src='js/three.js'></script>
+    <script src='js/OrbitControls.js'></script>
+</head>
+
+<body>
+    <script>
+        console.clear();
+        let spaceMaxSize = 6000;
+        let entities;
+        let camera, controls, scene, renderer, dirlight;
+        let [ww, wh] = [window.innerWidth, window.innerHeight];
+
+        loadJSON('data/starsystem_data.json', function (response) {
+            entities = JSON.parse(response);
+            //  inti();
+        });
+
+        init();
+        animate();
+
+        function init() {
+            scene = new THREE.Scene();
+
+            camera = new THREE.PerspectiveCamera(64, ww / wh, 1, spaceMaxSize * 3.5);
+            var helper = new THREE.CameraHelper(camera);
+            //scene.add(helper);
+
+            controls = new THREE.OrbitControls(camera);
+            //controls.maxAzimuthAngle.set(Math.PI*0.5);
+            controls.maxDistance = spaceMaxSize * 2.0;
+            camera.position.set(spaceMaxSize * -1.2, spaceMaxSize * 0.4, spaceMaxSize * -0.3);
+            controls.update();
+            let baseHeight = -1000;
+            for (let r = 1000; r <= 5000; r += 1000) {
+                addBaseMarker({ x: 0, y: -1000, z: 0 }, r, baseHeight);
+            }
+            getPOIs(entities, baseHeight);
+            addLights();
+            //addGrids();
+
+            window.addEventListener('resize', onWindowResize, false);
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.addEventListener('mousemove', onDocumentMouseMove, false);
+
+            document.body.appendChild(renderer.domElement);
+        }
+
+        function getPOIs(entities, baseHeight) {
+            for (let i in entities) {
+                let e = entities[i];
+                switch (e.type) {
+                    case "planet":
+                    case "moon":
+                        addSphere(e);
+                        addBaseMarker(e.coordinates, e.details.radius, baseHeight);
+                        addVerticalMarker(e.coordinates, baseHeight)
+                        getPOIs(e.pois, baseHeight);
+                        break;
+                    case "station":
+                        addStructure(e);
+                        //addOrbit(entities[e].coordinates);
+                        break;
+                    default: ;
+                }
+            }
+        }
+
+        function addBaseMarker(pos, radius, baseY) {
+            let material = new THREE.LineBasicMaterial({ color: 0x8080c0 })
+            let geometry = new THREE.CircleGeometry(radius, 64);
+            geometry.vertices.shift();
+            let circle = new THREE.LineLoop(geometry, material);
+            circle.rotation.x = Math.PI * 0.5;
+            circle.position.set(pos.x, baseY, pos.z);
+            scene.add(circle);
+        }
+
+        function addVerticalMarker(pos, baseY) {
+            let material = new THREE.LineBasicMaterial({ color: 0x8080c0 })
+            let geometry = new THREE.Geometry();
+            geometry.vertices.push(new THREE.Vector3(pos.x, baseY, pos.z));
+            geometry.vertices.push(new THREE.Vector3(pos.x, pos.y, pos.z));
+            scene.add(new THREE.Line(geometry, material));
+        }
+
+        function addLights() {
+            light = new THREE.HemisphereLight(0xffffff, 0x181818, 0.9);
+            light.position.set(-20, 10, 1);
+            scene.add(light);
+        }
+
+        function addSphere(orb) {
+            let geometry, material, sphere;
+            let radius = orb.details.radius != null ? orb.details.radius : 10;
+            let grid = orb.type == "planet" ? 24 : 16; // 
+            let pos = orb.coordinates;
+
+            geometry = new THREE.SphereBufferGeometry(radius, grid, grid);
+            material = new THREE.MeshLambertMaterial({ color: getHexColor(orb.details.color), wireframe: false });
+            sphere = new THREE.Mesh(geometry, material);
+            sphere.position.set(pos.x, pos.y, pos.z);
+            scene.add(sphere);
+        }
+
+        function getHexColor(c) {
+            if (c.hex != null) return parseInt(c.hex, 16);
+            return c.r << 16 | c.g << 8 | c.b
+        }
+
+        function addAsteroids(asteroids) {
+            let geometry = new THREE.Geometry();
+            let material = new THREE.PointsMaterial({ color: 0x9b9bac2, size: 5.0 });
+
+            for (let i in asteroids) {
+                let p = new THREE.Vector3(asteroids[i].position.x / 1000, asteroids[i].position.y / 1000, asteroids[i].position.z / 1000);
+                geometry.vertices.push(p);
+            }
+            let points = new THREE.Points(geometry, material);
+            scene.add(points);
+        }
+
+        function addStructure(structure) {
+            let geometry = new THREE.Geometry(),
+                material = new THREE.PointsMaterial({ color: 0xff2626, size: 25 }),
+                pos = structure.coordinates;
+
+            geometry.vertices.push(new THREE.Vector3(pos.x, pos.y, pos.z));
+            points = new THREE.Points(geometry, material);
+            scene.add(points);
+        }
+
+        function addGrids() {
+            let gridOptions = [spaceMaxSize * 2.1, 12, 0x707070, 0x303030];
+            let gridDistance = spaceMaxSize * 0.7;
+
+            let grid1 = new THREE.GridHelper(...gridOptions);
+            grid1.position.set(0, gridDistance, 0);
+            scene.add(grid1);
+
+            let grid2 = new THREE.GridHelper(spaceMaxSize * 2.1, 20, 0x707070, 0x303030);
+            grid2.position.set(0, -gridDistance, 0);
+            scene.add(grid2);
+        }
+
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            render();
+        }
+
+        function onDocumentMouseMove(event) {
+            event.preventDefault();
+            let mouse = { x: null, y: null };
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+        }
+
+        function render() {
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function loadJSON(path, callback) {
+            let xobj = new XMLHttpRequest();
+            xobj.overrideMimeType("application/json");
+            xobj.open('GET', path, false);
+            xobj.onreadystatechange = function () {
+                if (xobj.readyState == 4 && xobj.status == "200") {
+                    // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+                    callback(xobj.responseText);
+                }
+            };
+            xobj.send(null);
+        }
+
+    </script>
+</body>
+
+</html>

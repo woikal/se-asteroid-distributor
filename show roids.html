@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>Roid Field Simulation</title>
+	<style>
+		* {
+			padding: 0;
+			margin: 0 auto;
+		}
+
+		canvas {
+			background: #000;
+			border: 2px solid #ccc;
+			display: block;
+		}
+
+		textarea {
+			display: block;
+			width: 1024px;
+		}
+	</style>
+</head>
+
+<body>
+
+	<canvas id="myCanvas" width="1024" height="768"></canvas>
+	<textarea id="xml">XML output</textarea>
+
+	<script>
+		var canvas = document.getElementById("myCanvas");
+		var canvasWidth = canvas.width;
+		var canvasHeight = canvas.height;
+		var ctx = canvas.getContext("2d");
+		var canvasData = ctx.createImageData(canvasWidth, canvasHeight);
+
+		var voxelMaps = JSON.parse('js/voxelPaps.json');
+
+		function setPixel(x, y, r, g, b, a) {
+			var off = (x + y * canvasWidth) * 4;
+
+			canvasData.data[off + 0] = r;
+			canvasData.data[off + 1] = g;
+			canvasData.data[off + 2] = b;
+			canvasData.data[off + 3] = a;
+		}
+
+		function minMaxX(x) {
+			return (Math.max(0, Math.min(x, canvasWidth)));
+		}
+
+		function minMaxY(y) {
+			return (Math.max(0, Math.min(y, canvasHeight)));
+		}
+
+		function drawCross(x, y, col) {
+			var size = 4;
+
+			ctx.beginPath();
+			ctx.lineWidth = 1;
+			ctx.strokeStyle = col;
+			ctx.moveTo(minMaxX(x - size), minMaxY(y));
+			ctx.lineTo(minMaxX(x + size), minMaxY(y));
+			ctx.stroke();
+			ctx.moveTo(minMaxX(x), minMaxY(y - size));
+			ctx.lineTo(minMaxX(x), minMaxY(y + size));
+			ctx.stroke();
+			ctx.closePath();
+		}
+
+		function updateCanvas() {
+			ctx.putImageData(canvasData, 0, 0);
+		}
+
+		var amount = 200;
+		var fieldDepth = 20;
+		var clusterPropability = 0.15;
+
+		var xml = [];
+
+		var i;
+		for (i = 0; i < amount; i++) {
+			var x = getDistributedRandom(canvasWidth);
+			var y = getDistributedRandom(canvasHeight);
+			var z = getDistributedRandom(fieldDepth);
+			var rand = getRandomIndex(0.04, 0.10, 0.13, 0.15, 1.0);
+			var clusterSize = Math.floor(rand);
+			rand -= clusterSize;
+			var voxel = voxelMaps[Math.floor(getRandom(voxelMaps.length)) + 1];
+
+			var col = 'rgba(' + (clusterSize > 1 ? '255, 100, 0,' : '0, 100, 255,') + Math.max(z / fieldDepth, 30) + ')';
+
+			drawCross(x, y, col);
+			console.log(`Roid_${i + 1}:   (${clusterSize}/${rand})   x: ${x}   y: ${y}  z: ${z}  vox: ${voxel}`);
+
+			xml.push(`  <MyObjectBuilder_EntityBase xsi:type="MyObjectBuilder_VoxelMap">
+      <SubtypeName />
+      <EntityId>${i + 420001}</EntityId>
+      <PersistentFlags>CastShadows InScene</PersistentFlags>
+      <PositionAndOrientation>
+        <Position x="${x}" y="${y}" z="${z}" />
+        <Forward x="-0" y="-0" z="-1" />
+        <Up x="0" y="1" z="0" />
+        <Orientation>
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+          <W>1</W>
+        </Orientation>
+      </PositionAndOrientation>
+      <ContentChanged>false</ContentChanged>
+      <StorageName>Roid_${i + 1}</StorageName> 
+    </MyObjectBuilder_EntityBase>\n`);
+		}
+		document.getElementById("xml").innerHTML = xml.join('\n ');
+
+		function getRandom(max) {
+			return Math.random() * max;
+		}
+		function getDistributedRandom(max) {
+			// Center theorem 2x
+			return Math.floor((getRandom(1) + getRandom(1)) * max / 2);
+		}
+		function getRandomIndex() {
+			var rand = getRandom(1);
+			var i;
+			for (i = 0; i < arguments.length; i++) {
+				if (arguments[i] > rand) {
+					return arguments.length - i + rand;
+				}
+			}
+			return 1;
+		}
+
+		function getBinary(propability) {
+			return Math.random() < propability;
+		}
+
+	</script>
+
+</body>
+
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>2D Asteroid Field Simulation</title>
+    <style>
+        body {
+            padding: 0;
+            margin: 1em 2em;
+            font-family: Roboto;
+        }
+
+        canvas {
+            display: block;
+            background: #222;
+            border: 2px solid #ccc;
+        }
+
+        textarea {
+            display: block;
+            width: 100%;
+            height: 300px;
+            font-family: Consolas, "monospace";
+            font-size: 0.9em;
+            border: 2px solid #ccc;
+        }
+
+        label {
+            display: none;
+        }
+
+        .grid-container {
+            display: grid;
+
+            grid-template-columns: auto auto;
+            grid-row-gap: 1em;
+            grid-column-gap: 1em;
+        }
+
+        .grid-container>* {
+            width: auto;
+            max-width: 100%;
+        }
+    </style>
+    <script src="js/AsteroidMap.js"></script>
+    <script src="js/asteroids.js"></script>
+</head>
+
+<body>
+    <div id="out" class="grid-container">
+        <label for="code"></label><textarea id="code">XML output</textarea>
+        <label for="json"></label><textarea id="json">JSON output</textarea>
+    </div>
+    <script>
+        const fileUrl = 'data/voxelMaps.json'
+        let voxel;
+        fetch(fileUrl)
+            .then(r => r.text())
+            .then(voxel => voxel);
+
+        // let voxel = parseJSON("data/voxelMaps.json");
+
+        const amount = 1600;
+        const fieldDimension = new Vector3(740, 150, 740);
+
+        let field = new AsteroidField(amount, {
+            // dimension: new Vector3(1400, 1400, 1400),
+            // ditribution: 'sphere',
+            dimension: new Vector3(1400, 200, 1400),
+            distribution: 'spiral2',
+            maxRadius: 700,
+            intervals:5,
+            maxWidth: 160,
+            maxHeight: 60,
+            maxOffset: 190
+        });
+        let data = field.getField();
+        let sideView = new AsteroidMap(data, 'yz');
+        let frontView = new AsteroidMap(data, 'xy');
+        let topView = new AsteroidMap(data, 'xz');
+
+        frontView.draw();
+        sideView.draw();
+        topView.draw();
+
+        let out = document.getElementById('out');
+        out.appendChild(frontView.getCanvas());
+        out.appendChild(sideView.getCanvas());
+        out.appendChild(topView.getCanvas());
+
+
+        document.getElementById("code").textContent = field.getXML();
+        // document.getElementById("json").textContent = JSON.stringify({ asteroids: roids }, null, 0);
+
+        let pos = [];
+        for (let a of data.asteroids) {
+            pos.push(JSON.stringify(a.position));
+        }
+        document.getElementById("json").textContent = '{"asteroids":[' + pos.join(', ') + ']}';
+
+        function parseJSON(file) {
+            let json;
+            let request = new XMLHttpRequest();
+            request.onreadystatechange = function () {
+                if (request.status == 200 && request.readyState == 4) {
+                    json = request.responseText;
+                }
+            };
+            request.open("GET", file, true);
+            request.send();
+            alert(json);
+            let data = JSON.parse(request.responseText);
+            return data.result[0];
+        }
+
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>3D Space Map</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Roboto;
+        }
+    </style>
+    <!--script src="js/three.js"></script-->
+    <script src='js/three.js'></script>
+    <script src='js/OrbitControls.js'></script>
+    <script src='data/objects_data.js'></script>
+</head>
+
+<body>
+    <script>
+        // let asteroids = JSON.parse('data/steroids.json');
+        let spaceMaxSize = 6000;
+
+        let spaceObjects = JSON.parse(objects);
+
+        console.clear();
+
+        let camera, controls, scene, renderer, dirlight, grids = [];
+        let [ww, wh] = [window.innerWidth, window.innerHeight];
+
+        init();
+        animate();
+
+        function init() {
+            scene = new THREE.Scene();
+
+            camera = new THREE.PerspectiveCamera(64, ww / wh, 1, spaceMaxSize * 3.5);
+            var helper = new THREE.CameraHelper(camera);
+            // scene.add(helper);
+
+            controls = new THREE.OrbitControls(camera);
+            //controls.maxAzimuthAngle.set(Math.PI*0.5);
+            controls.maxDistance = spaceMaxSize * 2.0;
+            camera.position.set(spaceMaxSize * -1.2, spaceMaxSize * 0.4, spaceMaxSize * -0.3);
+            controls.update();
+
+            addLights();
+            addGrids();
+            addPlanets();
+            addAsteroids(spaceObjects.objects.voxelMaps);
+            addStructures(spaceObjects.objects.grids);
+            window.addEventListener( 'resize', onWindowResize, false );
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+
+            document.body.appendChild(renderer.domElement);
+        }
+
+        function addLights() {
+            light = new THREE.HemisphereLight(0xffffff, 0x181818, 0.9);
+            light.position.set(-20, 10, 1);
+            scene.add(light);
+        }
+
+        function addPlanets() {
+            let geometry, material, sphere;
+
+            // Terra
+            geometry = new THREE.SphereBufferGeometry(62, 24, 24);
+            material = new THREE.MeshLambertMaterial({ color: 0x2050b0 });
+            sphere = new THREE.Mesh(geometry, material);
+            sphere.position.set(0, 0, 0);
+            scene.add(sphere);
+            // Mars
+            geometry = new THREE.SphereBufferGeometry(50, 24, 24);
+            material = new THREE.MeshLambertMaterial({ color: 0xb07020 });
+            sphere = new THREE.Mesh(geometry, material);
+            sphere.position.set(1031, 131, 1631);
+            scene.add(sphere);
+            // Alien
+            geometry = new THREE.SphereBufferGeometry(69, 24, 24);
+            material = new THREE.MeshLambertMaterial({ color: 0x306020 });
+            sphere = new THREE.Mesh(geometry, material);
+            sphere.position.set(131, 131, 5731);
+            scene.add(sphere);
+            // Luna
+            geometry = new THREE.SphereBufferGeometry(10, 16, 16);
+            material = new THREE.MeshLambertMaterial({ color: 0x808080 });
+            sphere = new THREE.Mesh(geometry, material);
+            sphere.position.set(16, 136, -113);
+            scene.add(sphere);
+            // Europe
+            geometry = new THREE.SphereBufferGeometry(10, 16, 16);
+            material = new THREE.MeshLambertMaterial({ color: 0x3060ff });
+            sphere = new THREE.Mesh(geometry, material);
+            sphere.position.set(916, 16, 1631);
+            scene.add(sphere);
+            // Titan
+            geometry = new THREE.SphereBufferGeometry(10, 16, 16);
+            material = new THREE.MeshLambertMaterial({ color: 0xffbb33, wireframe: false });
+            sphere = new THREE.Mesh(geometry, material);
+            sphere.position.set(36, 226, 5796);
+            scene.add(sphere);
+        }
+
+
+        function addAsteroids(asteroids) {
+            let geometry = new THREE.Geometry();
+            let material = new THREE.PointsMaterial({ color: 0x9b9bac2, size: 5.0 });
+
+            for (let i in asteroids) {
+                let p = new THREE.Vector3(asteroids[i].position.x / 1000, asteroids[i].position.y / 1000, asteroids[i].position.z / 1000);
+                geometry.vertices.push(p);
+                console.log(p);
+            }
+            let points = new THREE.Points(geometry, material);
+            scene.add(points);
+        }
+
+        function addStructures(structures) {
+            let largeGeometry = new THREE.Geometry();
+            let smallGeometry = new THREE.Geometry();
+            let largeMaterial = new THREE.PointsMaterial({ color: 0xff3636, size: 1.5 });
+            let smallMaterial = new THREE.PointsMaterial({ color: 0x36ff36, size: 1.5 });
+
+            for (let i in structures) {
+                let s = structures[i];
+                let p = new THREE.Vector3(s.position.x / 1000, s.position.y / 1000, s.position.z / 1000);
+                if (s.size == 'large') {
+                    largeGeometry.vertices.push(p);
+                } else {
+                    smallGeometry.vertices.push(p);
+                }
+                console.log(p);
+            }
+            largePoints = new THREE.Points(largeGeometry, largeMaterial);
+            smallPoints = new THREE.Points(smallGeometry, smallMaterial);
+            scene.add(largePoints);
+            scene.add(smallPoints);
+        }
+
+
+        function addGrids() {
+            let gridOptions = [spaceMaxSize * 2.1, 12, 0x707070, 0x303030];
+            let gridDistance = spaceMaxSize * 0.7;
+
+            let grid1 = new THREE.GridHelper(...gridOptions);
+            grid1.position.set(0, gridDistance, 0);
+            scene.add(grid1);
+
+            let grid2 = new THREE.GridHelper(spaceMaxSize * 2.1, 20, 0x707070, 0x303030);
+            grid2.position.set(0, -gridDistance, 0);
+            scene.add(grid2);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            render();
+        }
+        function onDocumentMouseMove( event ) {
+				event.preventDefault();
+				mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+				mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+			}
+
+        function render() {
+            renderer.render(scene, camera);
+        }
+        function onWindowResize() {
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			}
+    </script>
+</body>
+
+</html>
